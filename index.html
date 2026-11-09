@@ -1,0 +1,1082 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b12">
+<title>Smart Car Doctor — AI Diagnostics</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg:#090b12;
+  --panel:#111522;
+  --panel2:#171d2c;
+  --border:#252d40;
+  --text:#f4f6ff;
+  --muted:#8992a8;
+  --purple:#8b5cf6;
+  --blue:#38bdf8;
+  --green:#22c55e;
+  --red:#fb7185;
+  --yellow:#fbbf24;
+  --shadow:0 15px 45px #0004;
+}
+body.light{
+  --bg:#f2f4fa;
+  --panel:#fff;
+  --panel2:#f0f2f8;
+  --border:#e0e4ee;
+  --text:#171b2b;
+  --muted:#687187;
+  --shadow:0 15px 40px #26304a12;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:Inter,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  transition:.25s;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:250px;flex-shrink:0;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  padding:25px 17px;
+  display:flex;flex-direction:column;
+  position:fixed;inset:0 auto 0 0;z-index:20;
+  transition:.25s;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 30px}
+.brand-icon{
+  width:43px;height:43px;border-radius:14px;
+  display:grid;place-items:center;font-size:23px;
+  background:linear-gradient(135deg,#8b5cf6,#2563eb);
+  box-shadow:0 7px 25px #8b5cf644;
+}
+.brand strong{font-size:16px;letter-spacing:-.5px}
+.brand small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.nav-label{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1.5px;padding:12px 12px}
+.nav-btn{
+  display:flex;align-items:center;gap:12px;
+  width:100%;border:0;background:transparent;
+  color:var(--muted);padding:12px;border-radius:11px;
+  text-align:left;margin:3px 0;font-size:13px;
+  transition:.2s;
+}
+.nav-btn:hover,.nav-btn.active{background:#8b5cf61b;color:var(--purple)}
+.nav-btn.active{font-weight:700}
+.nav-icon{width:22px;text-align:center;font-size:17px}
+.sidebar-bottom{margin-top:auto}
+.user-mini{display:flex;align-items:center;gap:10px;padding:15px 8px 0;border-top:1px solid var(--border)}
+.avatar{width:37px;height:37px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#2563eb);display:grid;place-items:center;font-weight:800;color:white}
+.user-mini strong{font-size:12px}
+.user-mini small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.main{margin-left:250px;width:calc(100% - 250px);min-width:0}
+.topbar{
+  height:76px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 34px;background:var(--bg);
+  position:sticky;top:0;z-index:10;
+}
+.top-title{font-weight:800;font-size:17px}
+.top-sub{font-size:11px;color:var(--muted);margin-top:5px}
+.top-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{
+  border:1px solid var(--border);background:var(--panel);
+  color:var(--text);width:39px;height:39px;border-radius:11px;
+}
+.content{padding:30px 34px 55px;max-width:1500px;margin:auto}
+.page{display:none;animation:fade .25s}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.page-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
+.page-heading h1{font-size:25px;letter-spacing:-1px}
+.page-heading p{font-size:12px;color:var(--muted);margin-top:7px}
+.btn{
+  border:0;border-radius:10px;padding:11px 16px;
+  font-size:12px;font-weight:700;
+  background:linear-gradient(135deg,#8b5cf6,#6366f1);
+  color:white;box-shadow:0 7px 20px #8b5cf633;
+}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn.secondary{background:var(--panel2);color:var(--text);box-shadow:none;border:1px solid var(--border)}
+.btn.danger{background:#fb71851b;color:var(--red);box-shadow:none}
+.btn.small{padding:8px 11px;font-size:11px}
+.grid{display:grid;gap:17px}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:20px}
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:16px;padding:19px;box-shadow:var(--shadow);
+  min-width:0;
+}
+.stat-top{display:flex;justify-content:space-between;align-items:center}
+.stat-icon{width:38px;height:38px;border-radius:12px;background:#8b5cf61c;display:grid;place-items:center;font-size:18px}
+.stat-name{font-size:11px;color:var(--muted)}
+.stat-value{font-size:25px;font-weight:800;margin-top:15px}
+.stat-note{font-size:10px;color:var(--muted);margin-top:7px}
+.two-col{grid-template-columns:1.4fr 1fr}
+.section-title{font-size:14px;font-weight:800;margin-bottom:16px}
+.hero{
+  background:linear-gradient(115deg,#211548,#172c54 65%,#102d40);
+  border:1px solid #5943a4;border-radius:19px;padding:27px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:20px;overflow:hidden;margin-bottom:20px;
+}
+.hero h2{font-size:23px;line-height:1.3}
+.hero p{color:#c4c6e3;font-size:12px;margin:10px 0 18px;max-width:440px;line-height:1.7}
+.hero-art{font-size:85px;filter:drop-shadow(0 10px 25px #0008)}
+.quick-grid{grid-template-columns:repeat(3,1fr)}
+.quick-card{cursor:pointer;transition:.2s}
+.quick-card:hover{border-color:var(--purple);transform:translateY(-3px)}
+.quick-card .q-icon{font-size:24px;margin-bottom:13px}
+.quick-card strong{font-size:13px;display:block}
+.quick-card p{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.6}
+.muted{color:var(--muted)}
+.small-text{font-size:11px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:15px}
+.field label{font-size:11px;color:var(--muted);font-weight:600}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--panel2);border:1px solid var(--border);
+  border-radius:10px;padding:12px;color:var(--text);outline:none;font-size:12px;
+}
+.field textarea{min-height:110px;resize:vertical;line-height:1.6}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--purple)}
+.upload-box{
+  border:1.5px dashed #6652a7;background:#8b5cf60a;
+  border-radius:15px;padding:25px;text-align:center;cursor:pointer;
+}
+.upload-box:hover{background:#8b5cf615}
+.upload-box .upload-icon{font-size:32px;margin-bottom:9px}
+.upload-box strong{font-size:13px}
+.upload-box p{font-size:11px;color:var(--muted);margin-top:7px}
+.preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.preview-item{position:relative}
+.preview-item img{width:100px;height:85px;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.preview-item button{position:absolute;top:4px;right:4px;border:0;background:#000b;color:white;border-radius:50%;width:22px;height:22px}
+.result-box{border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px;background:var(--panel2)}
+.result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+.pill{font-size:10px;padding:6px 9px;border-radius:30px;background:#fbbf2418;color:var(--yellow);font-weight:700}
+.result-item{padding:13px 0;border-top:1px solid var(--border)}
+.result-item strong{font-size:12px}
+.result-item p{font-size:11px;color:var(--muted);line-height:1.7;margin-top:6px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:500px}
+th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--border);font-size:11px}
+th{color:var(--muted);font-weight:600}
+td{color:var(--text)}
+.empty{text-align:center;padding:35px 15px;color:var(--muted);font-size:12px}
+.empty div{font-size:35px;margin-bottom:12px}
+.car-card{display:flex;gap:15px;align-items:center}
+.car-emoji{font-size:40px;width:75px;height:70px;border-radius:13px;background:var(--panel2);display:grid;place-items:center}
+.car-card h3{font-size:13px}
+.car-card p{font-size:11px;color:var(--muted);margin-top:6px}
+.car-actions{margin-left:auto;display:flex;gap:7px}
+.tag{font-size:10px;padding:5px 8px;border-radius:20px;background:#22c55e18;color:var(--green)}
+.toast{
+  position:fixed;right:22px;bottom:22px;z-index:100;
+  background:var(--panel);border:1px solid var(--border);
+  padding:13px 18px;border-radius:12px;font-size:12px;
+  box-shadow:var(--shadow);opacity:0;transform:translateY(15px);
+  pointer-events:none;transition:.25s;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.mobile-menu{display:none}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:15px 0;border-bottom:1px solid var(--border)}
+.settings-row strong{font-size:12px}
+.settings-row p{font-size:10px;color:var(--muted);margin-top:5px}
+.switch{width:42px;height:23px;appearance:none;background:#596174;border-radius:20px;position:relative;cursor:pointer}
+.switch:checked{background:var(--purple)}
+.switch:before{content:"";position:absolute;width:17px;height:17px;border-radius:50%;background:white;top:3px;left:3px;transition:.2s}
+.switch:checked:before{left:22px}
+.code-result{margin-top:15px;padding:15px;border-radius:12px;background:var(--panel2);font-size:12px;line-height:1.7}
+.footer{text-align:center;color:var(--muted);font-size:10px;padding:25px}
+@media(max-width:1050px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .sidebar{transform:translateX(-100%);box-shadow:var(--shadow)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;width:100%}
+  .topbar{height:65px;padding:0 16px}
+  .mobile-menu{display:inline-block}
+  .content{padding:22px 15px 40px}
+  .page-heading h1{font-size:21px}
+  .hero{padding:21px}
+  .hero h2{font-size:19px}
+  .hero-art{font-size:55px}
+  .quick-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+@media(max-width:430px){
+  .stats{gap:10px}
+  .card{padding:14px}
+  .stat-value{font-size:21px}
+  .quick-grid{grid-template-columns:1fr}
+  .hero-art{display:none}
+  .top-sub{display:none}
+  .page-heading{align-items:flex-start}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🚗</div>
+    <div><strong>SMART CAR DOCTOR</strong><small>AI AUTOMOTIVE SYSTEM</small></div>
+  </div>
+
+  <div class="nav-label">ASOSIY</div>
+  <button class="nav-btn active" data-page="dashboard"><span class="nav-icon">⌂</span> Dashboard</button>
+  <button class="nav-btn" data-page="diagnostics"><span class="nav-icon">✦</span> AI Diagnostics</button>
+  <button class="nav-btn" data-page="garage"><span class="nav-icon">🚘</span> My Garage</button>
+  <button class="nav-btn" data-page="health"><span class="nav-icon">♥</span> Car Health</button>
+
+  <div class="nav-label">AVTOMOBIL</div>
+  <button class="nav-btn" data-page="history"><span class="nav-icon">◷</span> Service History</button>
+  <button class="nav-btn" data-page="maintenance"><span class="nav-icon">🛠</span> Maintenance</button>
+  <button class="nav-btn" data-page="expenses"><span class="nav-icon">◈</span> Expenses</button>
+  <button class="nav-btn" data-page="obd"><span class="nav-icon">⌁</span> OBD-II Scanner</button>
+
+  <div class="nav-label">TIZIM</div>
+  <button class="nav-btn" data-page="assistant"><span class="nav-icon">✧</span> AI Assistant</button>
+  <button class="nav-btn" data-page="profile"><span class="nav-icon">◎</span> Profile</button>
+  <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙</span> Settings</button>
+
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar" id="sideAvatar">U</div>
+      <div><strong id="sideName">User</strong><small>Car Owner</small></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="icon-btn mobile-menu" id="menuBtn">☰</button>
+    <div>
+      <div class="top-title" id="topTitle">Dashboard</div>
+      <div class="top-sub" id="todayText"></div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" id="themeBtn" title="Theme">☼</button>
+    <button class="icon-btn" id="notificationBtn" title="Notifications">♧</button>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<section class="page active" id="dashboard">
+  <div class="hero">
+    <div>
+      <h2>Avtomobilingizni<br>aqlli usulda tekshiring.</h2>
+      <p>Rasm yuklang, muammoni tushuntiring va Smart Car Doctor yordamida dastlabki diagnostika ma'lumotlarini oling.</p>
+      <button class="btn" data-go="diagnostics">✦ Diagnostikani boshlash</button>
+    </div>
+    <div class="hero-art">🚘</div>
+  </div>
+
+  <div class="grid stats">
+    <div class="card">
+      <div class="stat-top"><span class="stat-name">Mening avtomobillarim</span><span class="stat-icon">🚘</span></div>
+      <div class="stat-value" id="statCars">0</div><div class="stat-note">Garajdagi avtomobillar</div>
+    </div>
+    <div class="card">
+      <div class="stat-top"><span class="stat-name">Diagnostikalar</span><span class="stat-icon">✦</span></div>
+      <div class="stat-value" id="statDiagnoses">0</div><div class="stat-note">Jami tekshiruvlar</div>
+    </div>
+    <div class="card">
+      <div class="stat-top"><span class="stat-name">Xarajatlar</span><span class="stat-icon">◈</span></div>
+      <div class="stat-value" id="statExpenses">0</div><div class="stat-note">Jami so‘m</div>
+    </div>
+    <div class="card">
+      <div class="stat-top"><span class="stat-name">Eslatmalar</span><span class="stat-icon">◷</span></div>
+      <div class="stat-value" id="statReminders">0</div><div class="stat-note">Rejalashtirilgan xizmatlar</div>
+    </div>
+  </div>
+
+  <div class="grid two-col">
+    <div class="card">
+      <div class="section-title">Tezkor xizmatlar</div>
+      <div class="grid quick-grid">
+        <div class="card quick-card" data-go="diagnostics"><div class="q-icon">📷</div><strong>Rasm tahlili</strong><p>Avtomobil rasmini yuboring.</p></div>
+        <div class="card quick-card" data-go="obd"><div class="q-icon">⌁</div><strong>OBD-II kodlari</strong><p>Xatolik kodini tekshiring.</p></div>
+        <div class="card quick-card" data-go="garage"><div class="q-icon">🚘</div><strong>Garaj</strong><p>Mashinalaringizni boshqaring.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">So‘nggi diagnostikalar</div>
+      <div id="recentDiagnoses" class="empty"><div>🔍</div>Hozircha diagnostika mavjud emas.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIAGNOSTICS -->
+<section class="page" id="diagnostics">
+  <div class="page-heading">
+    <div><h1>AI Diagnostics</h1><p>Avtomobilingizdagi muammoni dastlabki tahlil qiling.</p></div>
+    <span class="pill">DEMO AI MODE</span>
+  </div>
+
+  <div class="grid two-col">
+    <div class="card">
+      <div class="section-title">1. Avtomobil ma'lumotlari</div>
+      <div class="field">
+        <label>Avtomobilni tanlang</label>
+        <select id="diagnosticCar"><option value="">Avtomobil tanlanmagan</option></select>
+      </div>
+      <div class="field">
+        <label>Muammo turi</label>
+        <select id="problemType">
+          <option value="general">Umumiy muammo</option>
+          <option value="engine">Dvigatel / Motor</option>
+          <option value="brake">Tormoz tizimi</option>
+          <option value="battery">Akkumulyator</option>
+          <option value="tire">Shina / G‘ildirak</option>
+          <option value="cooling">Sovutish tizimi</option>
+          <option value="electrical">Elektr tizimi</option>
+          <option value="noise">G‘alati ovoz</option>
+        </select>
+      </div>
+
+      <div class="section-title" style="margin-top:22px">2. Rasm yuklash</div>
+      <label class="upload-box" for="imageInput">
+        <div class="upload-icon">📸</div>
+        <strong>Rasmlarni shu yerga yuklang</strong>
+        <p>JPG, PNG yoki WEBP · Bir nechta rasm tanlash mumkin</p>
+        <input type="file" id="imageInput" accept="image/*" multiple hidden>
+      </label>
+      <div class="preview" id="imagePreview"></div>
+
+      <div class="section-title" style="margin-top:22px">3. Muammoni tushuntiring</div>
+      <div class="field">
+        <label>Muammo haqida batafsil yozing</label>
+        <textarea id="problemText" placeholder="Masalan: Mashinam ishga tushganda titraydi, motor tomonidan g‘alati ovoz chiqadi..."></textarea>
+      </div>
+      <button class="btn" style="width:100%" id="analyzeBtn">✦ AI yordamida tahlil qilish</button>
+      <p class="small-text muted" style="margin-top:12px;line-height:1.6">Demo rejim: natijalar matn va tanlangan muammo turiga asoslangan. Rasm haqiqiy AI vision modeli orqali tahlil qilinmaydi.</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Diagnostika natijasi</div>
+      <div id="diagnosticResult" class="empty"><div>🧠</div>Avval avtomobil muammosini kiriting va tahlilni boshlang.</div>
+    </div>
+  </div>
+</section>
+
+<!-- GARAGE -->
+<section class="page" id="garage">
+  <div class="page-heading">
+    <div><h1>My Garage</h1><p>Shaxsiy avtomobillaringizni boshqaring.</p></div>
+    <button class="btn" id="addCarBtn">＋ Avtomobil qo‘shish</button>
+  </div>
+  <div class="card" id="garageList"><div class="empty"><div>🚘</div>Garajingiz hozircha bo‘sh.</div></div>
+
+  <div class="card" id="carForm" style="display:none;margin-top:18px">
+    <div class="section-title">Yangi avtomobil</div>
+    <div class="form-grid">
+      <div class="field"><label>Marka</label><input id="carBrand" placeholder="Chevrolet"></div>
+      <div class="field"><label>Model</label><input id="carModel" placeholder="Cobalt"></div>
+      <div class="field"><label>Ishlab chiqarilgan yil</label><input id="carYear" type="number" placeholder="2022"></div>
+      <div class="field"><label>Davlat raqami</label><input id="carPlate" placeholder="01 A 123 BC"></div>
+      <div class="field"><label>Yurgan masofasi (km)</label><input id="carKm" type="number" placeholder="50000"></div>
+      <div class="field"><label>Yoqilg‘i turi</label>
+        <select id="carFuel"><option>Benzin</option><option>Metan</option><option>Propan</option><option>Dizel</option><option>Gibrid</option><option>Elektr</option></select>
+      </div>
+    </div>
+    <button class="btn" id="saveCarBtn">Saqlash</button>
+    <button class="btn secondary" id="cancelCarBtn">Bekor qilish</button>
+  </div>
+</section>
+
+<!-- HEALTH -->
+<section class="page" id="health">
+  <div class="page-heading"><div><h1>Car Health</h1><p>Avtomobil holatini qayd eting va kuzating.</p></div></div>
+  <div class="card">
+    <div class="section-title">Avtomobil holati</div>
+    <p class="muted small-text" style="margin-bottom:18px">Quyidagi ko‘rsatkichlarni faqat tekshiruvdan keyin belgilang. Ular avtomatik sensor o‘lchovi emas.</p>
+    <div id="healthList"></div>
+    <button class="btn" id="saveHealthBtn" style="margin-top:15px">Holatni saqlash</button>
+  </div>
+</section>
+
+<!-- HISTORY -->
+<section class="page" id="history">
+  <div class="page-heading"><div><h1>Service History</h1><p>Diagnostika va xizmatlar tarixi.</p></div></div>
+  <div class="card">
+    <div class="table-wrap">
+      <table><thead><tr><th>Sana</th><th>Avtomobil</th><th>Muammo</th><th>Natija</th><th></th></tr></thead><tbody id="historyTable"></tbody></table>
+    </div>
+    <div id="historyEmpty" class="empty"><div>📋</div>Hali tarix mavjud emas.</div>
+  </div>
+</section>
+
+<!-- MAINTENANCE -->
+<section class="page" id="maintenance">
+  <div class="page-heading">
+    <div><h1>Maintenance Planner</h1><p>Texnik xizmatlarni rejalashtiring.</p></div>
+    <button class="btn" id="addReminderBtn">＋ Eslatma qo‘shish</button>
+  </div>
+  <div class="card">
+    <div id="reminderList" class="empty"><div>🛠</div>Hozircha eslatmalar yo‘q.</div>
+  </div>
+  <div class="card" id="reminderForm" style="display:none;margin-top:18px">
+    <div class="section-title">Yangi eslatma</div>
+    <div class="form-grid">
+      <div class="field"><label>Xizmat nomi</label><input id="reminderName" placeholder="Moy almashtirish"></div>
+      <div class="field"><label>Sana</label><input id="reminderDate" type="date"></div>
+    </div>
+    <button class="btn" id="saveReminderBtn">Saqlash</button>
+    <button class="btn secondary" id="cancelReminderBtn">Bekor qilish</button>
+  </div>
+</section>
+
+<!-- EXPENSES -->
+<section class="page" id="expenses">
+  <div class="page-heading">
+    <div><h1>Expenses</h1><p>Avtomobil xarajatlaringizni kuzating.</p></div>
+    <button class="btn" id="addExpenseBtn">＋ Xarajat qo‘shish</button>
+  </div>
+  <div class="grid stats">
+    <div class="card"><div class="stat-name">Jami xarajat</div><div class="stat-value" id="expenseTotal">0</div><div class="stat-note">So‘m</div></div>
+    <div class="card"><div class="stat-name">Xarajatlar soni</div><div class="stat-value" id="expenseCount">0</div><div class="stat-note">Qayd etilgan</div></div>
+  </div>
+  <div class="card" id="expenseForm" style="display:none;margin-bottom:18px">
+    <div class="section-title">Yangi xarajat</div>
+    <div class="form-grid">
+      <div class="field"><label>Xarajat nomi</label><input id="expenseName" placeholder="Benzin"></div>
+      <div class="field"><label>Summa (so‘m)</label><input id="expenseAmount" type="number" min="0" placeholder="150000"></div>
+      <div class="field"><label>Kategoriya</label><select id="expenseCategory"><option>Yoqilg‘i</option><option>Ta'mirlash</option><option>Moy va filtr</option><option>Yuvish</option><option>Boshqa</option></select></div>
+      <div class="field"><label>Sana</label><input id="expenseDate" type="date"></div>
+    </div>
+    <button class="btn" id="saveExpenseBtn">Saqlash</button>
+    <button class="btn secondary" id="cancelExpenseBtn">Bekor qilish</button>
+  </div>
+  <div class="card">
+    <div class="section-title">Xarajatlar ro‘yxati</div>
+    <div class="table-wrap"><table><thead><tr><th>Sana</th><th>Nomi</th><th>Kategoriya</th><th>Summa</th><th></th></tr></thead><tbody id="expenseTable"></tbody></table></div>
+    <div id="expenseEmpty" class="empty"><div>◈</div>Hozircha xarajat yo‘q.</div>
+  </div>
+</section>
+
+<!-- OBD -->
+<section class="page" id="obd">
+  <div class="page-heading"><div><h1>OBD-II Scanner</h1><p>Avtomobil diagnostika kodlari haqida ma'lumot oling.</p></div></div>
+  <div class="card">
+    <div class="section-title">Xatolik kodini tekshirish</div>
+    <div class="field"><label>OBD-II kodi</label><input id="obdCode" placeholder="Masalan: P0300" style="max-width:350px;text-transform:uppercase"></div>
+    <button class="btn" id="checkCodeBtn">Kodni tekshirish</button>
+    <div id="obdResult"></div>
+    <p class="small-text muted" style="margin-top:15px">Bu kodlar ma'lumotnomasi. Sayt avtomobilga bevosita ulanmagan.</p>
+  </div>
+</section>
+
+<!-- AI ASSISTANT -->
+<section class="page" id="assistant">
+  <div class="page-heading"><div><h1>AI Assistant</h1><p>Avtomobil haqida savollaringizni yozing.</p></div></div>
+  <div class="card">
+    <div id="chatMessages" style="height:350px;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:5px">
+      <div class="result-box" style="max-width:85%;margin:0"><strong>Smart Car Doctor</strong><p>Salom! Avtomobilingiz haqida qanday savolingiz bor?</p></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:15px">
+      <input id="chatInput" placeholder="Savolingizni yozing..." style="flex:1;min-width:0;background:var(--panel2);border:1px solid var(--border);padding:13px;border-radius:10px;color:var(--text)">
+      <button class="btn" id="sendChatBtn">Yuborish</button>
+    </div>
+    <p class="small-text muted" style="margin-top:10px">Demo yordamchi: javoblar oldindan belgilangan qoidalar asosida tuziladi.</p>
+  </div>
+</section>
+
+<!-- PROFILE -->
+<section class="page" id="profile">
+  <div class="page-heading"><div><h1>My Profile</h1><p>Shaxsiy ma'lumotlaringiz.</p></div></div>
+  <div class="card">
+    <div class="field"><label>Ismingiz</label><input id="profileName" placeholder="Ismingiz"></div>
+    <div class="field"><label>Email</label><input id="profileEmail" type="email" placeholder="example@gmail.com"></div>
+    <div class="field"><label>Telefon</label><input id="profilePhone" placeholder="+998"></div>
+    <button class="btn" id="saveProfileBtn">Profilni saqlash</button>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="settings">
+  <div class="page-heading"><div><h1>Settings</h1><p>Ilova sozlamalarini boshqaring.</p></div></div>
+  <div class="card">
+    <div class="settings-row"><div><strong>Light mode</strong><p>Yorug‘ dizaynni yoqish</p></div><input type="checkbox" class="switch" id="lightSwitch"></div>
+    <div class="settings-row"><div><strong>Bildirishnomalar</strong><p>Sayt ichidagi eslatmalar</p></div><input type="checkbox" class="switch" id="notifySwitch" checked></div>
+    <div class="settings-row"><div><strong>Mahalliy ma'lumotlar</strong><p>Ma'lumotlar shu brauzerda saqlanadi.</p></div><button class="btn secondary small" id="exportBtn">Export JSON</button></div>
+    <div class="settings-row"><div><strong>Ma'lumotlarni tozalash</strong><p>Barcha saqlangan ma'lumotlarni o‘chirish</p></div><button class="btn danger small" id="clearBtn">Tozalash</button></div>
+  </div>
+</section>
+
+<div class="footer">SMART CAR DOCTOR © 2026 · AI AUTOMOTIVE ASSISTANT</div>
+</div>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================
+   SMART CAR DOCTOR — APPLICATION ENGINE
+====================================== */
+
+const $ = id => document.getElementById(id);
+
+const DB = {
+  get(key, fallback = []) {
+    try {
+      const value = localStorage.getItem("scd_" + key);
+      return value ? JSON.parse(value) : fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  set(key, value) {
+    localStorage.setItem("scd_" + key, JSON.stringify(value));
+  }
+};
+
+let cars = DB.get("cars", []);
+let diagnoses = DB.get("diagnoses", []);
+let expenses = DB.get("expenses", []);
+let reminders = DB.get("reminders", []);
+let health = DB.get("health", [
+  {name:"Dvigatel",value:"Tekshirilmagan"},
+  {name:"Akkumulyator",value:"Tekshirilmagan"},
+  {name:"Tormoz tizimi",value:"Tekshirilmagan"},
+  {name:"Shinalar",value:"Tekshirilmagan"},
+  {name:"Sovutish tizimi",value:"Tekshirilmagan"}
+]);
+let profile = DB.get("profile", {
+  name:"User",email:"",phone:""
+});
+let selectedImages = [];
+
+const money = n => new Intl.NumberFormat("uz-UZ").format(Number(n)||0);
+const today = () => new Date().toISOString().slice(0,10);
+
+function saveAll(){
+  DB.set("cars",cars);
+  DB.set("diagnoses",diagnoses);
+  DB.set("expenses",expenses);
+  DB.set("reminders",reminders);
+  DB.set("health",health);
+  DB.set("profile",profile);
+}
+
+function toast(message){
+  const el=$("toast");
+  el.textContent=message;
+  el.classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer=setTimeout(()=>el.classList.remove("show"),2600);
+}
+
+function safe(value){
+  return String(value ?? "").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function showPage(page){
+  const target=$(page);
+  if(!target || !target.classList.contains("page")) return;
+
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(b=>{
+    b.classList.toggle("active",b.dataset.page===page);
+  });
+
+  const active=document.querySelector('.nav-btn[data-page="'+page+'"]');
+  $("topTitle").textContent=active ? active.textContent.trim() : "Smart Car Doctor";
+
+  $("sidebar").classList.remove("open");
+  window.scrollTo({top:0,behavior:"smooth"});
+
+  renderAll();
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>showPage(btn.dataset.page));
+});
+
+document.querySelectorAll("[data-go]").forEach(btn=>{
+  btn.addEventListener("click",()=>showPage(btn.dataset.go));
+});
+
+$("menuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+
+$("todayText").textContent=new Intl.DateTimeFormat("uz-UZ",{
+  weekday:"long",year:"numeric",month:"long",day:"numeric"
+}).format(new Date());
+
+/* THEME */
+function setTheme(light){
+  document.body.classList.toggle("light",light);
+  $("lightSwitch").checked=light;
+  DB.set("theme",light);
+  $("themeBtn").textContent=light?"☾":"☼";
+}
+setTheme(DB.get("theme",false));
+$("themeBtn").addEventListener("click",()=>setTheme(!document.body.classList.contains("light")));
+$("lightSwitch").addEventListener("change",e=>setTheme(e.target.checked));
+
+/* PROFILE */
+function renderProfile(){
+  $("profileName").value=profile.name||"";
+  $("profileEmail").value=profile.email||"";
+  $("profilePhone").value=profile.phone||"";
+  $("sideName").textContent=profile.name||"User";
+  $("sideAvatar").textContent=(profile.name||"U").trim().charAt(0).toUpperCase();
+}
+$("saveProfileBtn").addEventListener("click",()=>{
+  profile={
+    name:$("profileName").value.trim()||"User",
+    email:$("profileEmail").value.trim(),
+    phone:$("profilePhone").value.trim()
+  };
+  saveAll();renderProfile();toast("Profil saqlandi!");
+});
+
+/* GARAGE */
+$("addCarBtn").addEventListener("click",()=>{
+  $("carForm").style.display="block";
+  $("carBrand").focus();
+});
+$("cancelCarBtn").addEventListener("click",()=>$("carForm").style.display="none");
+
+$("saveCarBtn").addEventListener("click",()=>{
+  const brand=$("carBrand").value.trim();
+  const model=$("carModel").value.trim();
+  if(!brand||!model){toast("Marka va modelni kiriting!");return;}
+
+  cars.push({
+    id:Date.now(),
+    brand,model,
+    year:$("carYear").value,
+    plate:$("carPlate").value.trim(),
+    km:$("carKm").value,
+    fuel:$("carFuel").value
+  });
+  saveAll();
+  ["carBrand","carModel","carYear","carPlate","carKm"].forEach(id=>$(id).value="");
+  $("carForm").style.display="none";
+  renderAll();toast("Avtomobil garajga qo‘shildi!");
+});
+
+function deleteCar(id){
+  if(!confirm("Ushbu avtomobilni o‘chirmoqchimisiz?"))return;
+  cars=cars.filter(c=>c.id!==id);
+  saveAll();renderAll();toast("Avtomobil o‘chirildi.");
+}
+
+function renderGarage(){
+  const box=$("garageList");
+  if(!cars.length){
+    box.innerHTML='<div class="empty"><div>🚘</div>Garajingiz hozircha bo‘sh.</div>';
+  }else{
+    box.innerHTML=cars.map(c=>`
+      <div class="car-card" style="padding:15px 0;border-bottom:1px solid var(--border)">
+        <div class="car-emoji">🚘</div>
+        <div>
+          <h3>${safe(c.brand)} ${safe(c.model)}</h3>
+          <p>${safe(c.year||"Yil ko‘rsatilmagan")} · ${safe(c.plate||"Raqam yo‘q")}</p>
+          <p>${money(c.km)} km · ${safe(c.fuel)}</p>
+        </div>
+        <div class="car-actions">
+          <button class="btn secondary small" onclick="selectCar(${c.id})">Tanlash</button>
+          <button class="btn danger small" onclick="deleteCar(${c.id})">✕</button>
+        </div>
+      </div>`).join("");
+  }
+
+  $("diagnosticCar").innerHTML='<option value="">Avtomobil tanlanmagan</option>'+
+    cars.map(c=>`<option value="${c.id}">${safe(c.brand)} ${safe(c.model)}</option>`).join("");
+}
+function selectCar(id){
+  $("diagnosticCar").value=String(id);
+  showPage("diagnostics");
+}
+
+/* IMAGE UPLOAD */
+$("imageInput").addEventListener("change",e=>{
+  const files=Array.from(e.target.files||[]);
+  const valid=files.filter(f=>f.type.startsWith("image/")&&f.size<=8*1024*1024);
+  if(valid.length!==files.length)toast("Faqat rasm fayllari, har biri 8 MB gacha!");
+  selectedImages=valid.slice(0,5);
+  renderImagePreview();
+});
+
+function renderImagePreview(){
+  $("imagePreview").innerHTML="";
+  selectedImages.forEach((file,index)=>{
+    const url=URL.createObjectURL(file);
+    const item=document.createElement("div");
+    item.className="preview-item";
+    const img=document.createElement("img");
+    img.src=url;
+    img.alt="Yuklangan avtomobil rasmi";
+    const remove=document.createElement("button");
+    remove.type="button";remove.textContent="×";
+    remove.addEventListener("click",()=>{
+      selectedImages.splice(index,1);
+      renderImagePreview();
+    });
+    item.append(img,remove);
+    $("imagePreview").append(item);
+  });
+}
+
+/* DEMO DIAGNOSTICS */
+const problemInfo={
+  engine:{
+    title:"Dvigatel bilan bog‘liq muammo",
+    causes:["O‘t oldirish tizimini tekshirish talab qilinishi mumkin.","Yoqilg‘i ta'minoti yoki havo kirish tizimida muammo bo‘lishi mumkin.","Dvigatel datchiklari va diagnostika kodlarini tekshirtiring."],
+    advice:"Dvigatelda kuchli titrash, quvvat yo‘qolishi yoki noodatiy ovoz bo‘lsa, avtomobilni ustaga ko‘rsating."
+  },
+  brake:{
+    title:"Tormoz tizimi bo‘yicha ogohlantirish",
+    causes:["Tormoz kolodkalari yeyilgan bo‘lishi mumkin.","Tormoz suyuqligi darajasini tekshirish kerak.","Tormoz disklari yoki boshqa qismlarda muammo bo‘lishi mumkin."],
+    advice:"Tormoz ishlashida shubha bo‘lsa, avtomobilni haydamang. Mutaxassis tekshiruvini tashkil qiling."
+  },
+  battery:{
+    title:"Akkumulyator yoki elektr ta'minoti",
+    causes:["Akkumulyator zaryadi past bo‘lishi mumkin.","Klemma ulanishlarini tekshirish kerak.","Generator zaryadlash tizimi tekshiruv talab qilishi mumkin."],
+    advice:"Elektr tizimini malakali ustaga tekshirtiring."
+  },
+  tire:{
+    title:"Shina yoki g‘ildirak muammosi",
+    causes:["Shina bosimi me'yordan farq qilishi mumkin.","Shinada shikastlanish yoki notekis yeyilish bo‘lishi mumkin.","G‘ildirak balansini tekshirish talab qilinishi mumkin."],
+    advice:"Shinada shish, chuqur kesik yoki havo chiqishi bo‘lsa, harakatni davom ettirmang."
+  },
+  cooling:{
+    title:"Sovutish tizimi muammosi",
+    causes:["Sovutish suyuqligi darajasi past bo‘lishi mumkin.","Radiator yoki shlanglar tekshiruv talab qilishi mumkin.","Termostat yoki ventilyator tizimida muammo bo‘lishi mumkin."],
+    advice:"Motor qizib ketgan bo‘lsa, xavfsiz joyda to‘xtang va dvigatel sovimaguncha radiator qopqog‘ini ochmang."
+  },
+  electrical:{
+    title:"Elektr tizimi muammosi",
+    causes:["Simlar yoki kontaktlarda uzilish bo‘lishi mumkin.","Saqlagichlar va relelarni tekshirish kerak.","Datchik yoki boshqaruv moduli xatolik berayotgan bo‘lishi mumkin."],
+    advice:"Elektr tizimini malakali avtoelektrikka tekshirtiring."
+  },
+  noise:{
+    title:"Noodatiy ovoz",
+    causes:["Ovoz dvigatel, transmissiya yoki yordamchi qismlardan kelishi mumkin.","G‘ildirak podshipnigi yoki osma qismlar tekshiruv talab qilishi mumkin.","Ovozning qachon paydo bo‘lishi muhim."],
+    advice:"Ovoz kuchli yoki yangi paydo bo‘lgan bo‘lsa, avtomobilni tekshirtiring."
+  },
+  general:{
+    title:"Umumiy diagnostika",
+    causes:["Muammoni aniqlash uchun qo‘shimcha ma'lumot kerak.","Paneldagi ogohlantirish chiroqlarini tekshiring.","Zarur bo‘lsa, OBD-II diagnostika qildiring."],
+    advice:"Muammo qachon va qanday sharoitda yuz berishini yozib boring."
+  }
+};
+
+$("analyzeBtn").addEventListener("click",()=>{
+  const text=$("problemText").value.trim();
+  const type=$("problemType").value;
+  const carId=$("diagnosticCar").value;
+  if(!text&&!selectedImages.length){
+    toast("Muammoni yozing yoki rasm yuklang!");return;
+  }
+
+  const info=problemInfo[type]||problemInfo.general;
+  const car=cars.find(c=>String(c.id)===carId);
+  const id=Date.now();
+
+  const urgentWords=/tormoz ishlamay|tormoz yo‘q|tormoz ushlamay|rul ishlamay|tutun chiq|motor qizib|benzin sizib|yoqilg‘i sizib/i;
+  const urgent=urgentWords.test(text);
+
+  const report={
+    id,
+    date:new Date().toLocaleString("uz-UZ"),
+    car:car?car.brand+" "+car.model:"Avtomobil ko‘rsatilmagan",
+    type,
+    text:text||"Rasm yuklangan, matn kiritilmagan.",
+    title:info.title,
+    causes:info.causes,
+    advice:urgent?"Xavfsizlikka tahdid bo‘lishi mumkin. Xavfsiz joyda to‘xtang va mutaxassis yordamiga murojaat qiling.":info.advice,
+    status:urgent?"Shoshilinch tekshiruv":"Tekshiruv tavsiya etiladi",
+    images:selectedImages.length
+  };
+
+  diagnoses.unshift(report);
+  saveAll();
+  renderDiagnosticResult(report);
+  renderAll();
+  toast("Demo diagnostika hisoboti tayyor!");
+});
+
+function renderDiagnosticResult(r){
+  $("diagnosticResult").innerHTML=`
+    <div class="result-head">
+      <strong>${safe(r.title)}</strong>
+      <span class="pill">${safe(r.status)}</span>
+    </div>
+    <p class="small-text muted">${safe(r.car)} · ${safe(r.date)}</p>
+    <div class="result-item"><strong>Yuborilgan muammo</strong><p>${safe(r.text)}</p></div>
+    <div class="result-item"><strong>Ehtimoliy sabablar</strong>
+      ${r.causes.map(c=>`<p>• ${safe(c)}</p>`).join("")}
+    </div>
+    <div class="result-item"><strong>Tavsiya</strong><p>${safe(r.advice)}</p></div>
+    <div class="result-item"><strong>Yuklangan rasmlar</strong><p>${r.images} ta rasm. Demo versiyada rasmlarning mazmuni AI orqali tahlil qilinmagan.</p></div>
+    <p class="small-text muted" style="margin-top:15px">Bu dastlabki ma'lumot, yakuniy mexanik tashxis emas.</p>
+    <button class="btn secondary small" id="printReportBtn" style="margin-top:12px">Hisobotni chop etish</button>`;
+  $("printReportBtn").addEventListener("click",()=>window.print());
+}
+
+/* HISTORY */
+function renderHistory(){
+  const body=$("historyTable");
+  body.innerHTML=diagnoses.map(d=>`
+    <tr>
+      <td>${safe(d.date)}</td>
+      <td>${safe(d.car)}</td>
+      <td>${safe(d.title)}</td>
+      <td><span class="pill">${safe(d.status)}</span></td>
+      <td><button class="btn secondary small" onclick="viewReport(${d.id})">Ko‘rish</button></td>
+    </tr>`).join("");
+  $("historyEmpty").style.display=diagnoses.length?"none":"block";
+}
+function viewReport(id){
+  const report=diagnoses.find(d=>d.id===id);
+  if(!report)return;
+  showPage("diagnostics");
+  renderDiagnosticResult(report);
+}
+
+/* HEALTH */
+function renderHealth(){
+  $("healthList").innerHTML=health.map((h,i)=>`
+    <div class="settings-row">
+      <div><strong>${safe(h.name)}</strong><p>Holatni o‘zingiz belgilaysiz</p></div>
+      <select data-health="${i}" style="background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:9px;border-radius:9px">
+        ${["Tekshirilmagan","Yaxshi","Tekshirish kerak","Nosoz"].map(v=>`<option ${h.value===v?"selected":""}>${v}</option>`).join("")}
+      </select>
+    </div>`).join("");
+}
+$("saveHealthBtn").addEventListener("click",()=>{
+  document.querySelectorAll("[data-health]").forEach(el=>{
+    health[Number(el.dataset.health)].value=el.value;
+  });
+  saveAll();toast("Avtomobil holati saqlandi!");
+});
+
+/* MAINTENANCE */
+$("addReminderBtn").addEventListener("click",()=>$("reminderForm").style.display="block");
+$("cancelReminderBtn").addEventListener("click",()=>$("reminderForm").style.display="none");
+$("reminderDate").value=today();
+
+$("saveReminderBtn").addEventListener("click",()=>{
+  const name=$("reminderName").value.trim();
+  const date=$("reminderDate").value;
+  if(!name||!date){toast("Xizmat nomi va sanani kiriting!");return;}
+  reminders.push({id:Date.now(),name,date,done:false});
+  saveAll();$("reminderName").value="";
+  $("reminderForm").style.display="none";
+  renderAll();toast("Eslatma qo‘shildi!");
+});
+
+function toggleReminder(id){
+  const item=reminders.find(r=>r.id===id);
+  if(!item)return;
+  item.done=!item.done;saveAll();renderAll();
+}
+function deleteReminder(id){
+  reminders=reminders.filter(r=>r.id!==id);
+  saveAll();renderAll();toast("Eslatma o‘chirildi.");
+}
+function renderReminders(){
+  $("reminderList").className=reminders.length?"":"empty";
+  $("reminderList").innerHTML=reminders.length?reminders.map(r=>`
+    <div class="settings-row">
+      <div>
+        <strong style="${r.done?"text-decoration:line-through;opacity:.5":""}">${safe(r.name)}</strong>
+        <p>${safe(r.date)}</p>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn secondary small" onclick="toggleReminder(${r.id})">${r.done?"Qaytarish":"Bajarildi"}</button>
+        <button class="btn danger small" onclick="deleteReminder(${r.id})">✕</button>
+      </div>
+    </div>`).join(""):'<div><div>🛠</div>Hozircha eslatmalar yo‘q.</div>';
+}
+
+/* EXPENSES */
+$("addExpenseBtn").addEventListener("click",()=>$("expenseForm").style.display="block");
+$("cancelExpenseBtn").addEventListener("click",()=>$("expenseForm").style.display="none");
+$("expenseDate").value=today();
+
+$("saveExpenseBtn").addEventListener("click",()=>{
+  const name=$("expenseName").value.trim();
+  const amount=Number($("expenseAmount").value);
+  const date=$("expenseDate").value;
+  if(!name||!amount||amount<0||!date){toast("Xarajat ma'lumotlarini to‘g‘ri kiriting!");return;}
+  expenses.unshift({
+    id:Date.now(),name,amount,date,
+    category:$("expenseCategory").value
+  });
+  saveAll();
+  $("expenseName").value="";$("expenseAmount").value="";
+  $("expenseForm").style.display="none";
+  renderAll();toast("Xarajat saqlandi!");
+});
+
+function deleteExpense(id){
+  expenses=expenses.filter(e=>e.id!==id);
+  saveAll();renderAll();toast("Xarajat o‘chirildi.");
+}
+function renderExpenses(){
+  const total=expenses.reduce((sum,e)=>sum+Number(e.amount),0);
+  $("expenseTotal").textContent=money(total);
+  $("expenseCount").textContent=expenses.length;
+  $("expenseTable").innerHTML=expenses.map(e=>`
+    <tr><td>${safe(e.date)}</td><td>${safe(e.name)}</td><td>${safe(e.category)}</td>
+    <td>${money(e.amount)} so‘m</td>
+    <td><button class="btn danger small" onclick="deleteExpense(${e.id})">✕</button></td></tr>`).join("");
+  $("expenseEmpty").style.display=expenses.length?"none":"block";
+}
+
+/* OBD DATABASE */
+const obdDatabase={
+  P0300:["Tasodifiy yoki bir nechta silindrda yonish uzilishi","Shamlar, o‘t oldirish tizimi, yoqilg‘i ta'minoti yoki boshqa sabablar tekshiriladi."],
+  P0301:["1-silindrda yonish uzilishi","1-silindr shamini, g‘altagini va tegishli tizimlarni tekshirtiring."],
+  P0171:["Aralashma haddan tashqari kambag‘al","Vakuum sizishi, havo o‘lchash tizimi va yoqilg‘i ta'minoti tekshiriladi."],
+  P0172:["Aralashma haddan tashqari boy","Yoqilg‘i va havo boshqaruvi tizimlarini tekshirtiring."],
+  P0420:["Katalizator samaradorligi past","Katalizator va kislorod datchiklari tekshiruv talab qilishi mumkin."],
+  P0455:["EVAP tizimida katta sizish aniqlangan","Yoqilg‘i bug‘larini ushlab turish tizimi va qopqoq tekshiriladi."],
+  P0128:["Dvigatel sovutish harorati me'yorga yetmayapti","Termostat va sovutish tizimini tekshirtiring."],
+  P0401:["EGR oqimi yetarli emas","EGR tizimi va kanallar tekshirilishi mumkin."],
+  P0442:["EVAP tizimida kichik sizish","Yoqilg‘i qopqog‘i va bug‘ tizimi tekshiriladi."],
+  P0113:["Kirish havosi harorati datchigi signali yuqori","Datchik va elektr ulanishlari tekshiriladi."]
+};
+
+$("checkCodeBtn").addEventListener("click",()=>{
+  const code=$("obdCode").value.trim().toUpperCase();
+  if(!code){toast("OBD-II kodini kiriting!");return;}
+  const result=obdDatabase[code];
+  $("obdResult").innerHTML=result?`
+    <div class="code-result">
+      <span class="tag">KOD TOPILDI</span>
+      <h3 style="margin:12px 0">${safe(code)} — ${safe(result[0])}</h3>
+      <p>${safe(result[1])}</p>
+      <p style="color:var(--muted);margin-top:12px">Kodning o‘zi yakuniy tashxis emas. Avtomobil modeli va qo‘shimcha tekshiruvlar muhim.</p>
+    </div>`:`
+    <div class="code-result">
+      <strong>${safe(code)}</strong>
+      <p>Bu demo ma'lumotlar bazasida kod topilmadi. To‘liq izoh uchun avtomobil modeli va ishlab chiqaruvchi ma'lumotnomasini tekshiring.</p>
+    </div>`;
+});
+
+/* CHAT ASSISTANT */
+function addChat(text,who){
+  const div=document.createElement("div");
+  div.className="result-box";
+  div.style.maxWidth="85%";
+  if(who==="user")div.style.alignSelf="flex-end";
+  const strong=document.createElement("strong");
+  strong.textContent=who==="user"?"Siz":"Smart Car Doctor";
+  const p=document.createElement("p");
+  p.textContent=text;
+  p.style.marginTop="7px";
+  div.append(strong,p);
+  $("chatMessages").append(div);
+  $("chatMessages").scrollTop=$("chatMessages").scrollHeight;
+}
+function assistantAnswer(q){
+  const text=q.toLowerCase();
+  if(/qizib|harorat/.test(text))return "Dvigatel qizib ketayotgan bo‘lsa, xavfsiz joyda to‘xtang. Dvigatel sovimaguncha radiator qopqog‘ini ochmang. Sovutish tizimini ustaga tekshirtiring.";
+  if(/tormoz/.test(text))return "Tormoz tizimida muammo bo‘lsa, avtomobilni haydash xavfli bo‘lishi mumkin. Harakatni davom ettirmang va mutaxassis yordamiga murojaat qiling.";
+  if(/akkumulyator|batareya|o‘t olmay/.test(text))return "Akkumulyator zaryadi, klemmalar va generator tizimi tekshirilishi mumkin. Aniq sababni aniqlash uchun elektr tizimini tekshirtiring.";
+  if(/moy|maslo/.test(text))return "Moy turi va almashtirish oralig‘i avtomobil ishlab chiqaruvchisi tavsiyasiga bog‘liq. Qo‘llanmadagi spetsifikatsiyani tekshiring.";
+  if(/check engine|motor chiroq/.test(text))return "Check Engine chirog‘i turli nosozliklarda yonishi mumkin. OBD-II skaner bilan xatolik kodini o‘qitish kerak.";
+  return "Bu savol bo‘yicha aniq javob berish uchun avtomobil markasi, modeli, yili va muammo qachon yuz berishini yozing. Men hozir demo yordamchi rejimidaman.";
+}
+function sendChat(){
+  const q=$("chatInput").value.trim();
+  if(!q)return;
+  addChat(q,"user");$("chatInput").value="";
+  setTimeout(()=>addChat(assistantAnswer(q),"ai"),250);
+}
+$("sendChatBtn").addEventListener("click",sendChat);
+$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
+
+/* NOTIFICATIONS */
+$("notificationBtn").addEventListener("click",()=>{
+  const pending=reminders.filter(r=>!r.done);
+  if(!pending.length){toast("Yangi bildirishnoma yo‘q.");return;}
+  toast("Bajarilmagan eslatmalar: "+pending.length);
+});
+
+/* EXPORT / CLEAR */
+$("exportBtn").addEventListener("click",()=>{
+  const data={cars,diagnoses,expenses,reminders,health,profile};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="smart-car-doctor-data.json";a.click();
+  URL.revokeObjectURL(url);
+  toast("Ma'lumotlar eksport qilindi!");
+});
+
+$("clearBtn").addEventListener("click",()=>{
+  if(!confirm("Barcha Smart Car Doctor ma'lumotlarini o‘chirishni tasdiqlaysizmi?"))return;
+  ["cars","diagnoses","expenses","reminders","health","profile","theme"].forEach(k=>localStorage.removeItem("scd_"+k));
+  cars=[];diagnoses=[];expenses=[];reminders=[];
+  health=[
+    {name:"Dvigatel",value:"Tekshirilmagan"},
+    {name:"Akkumulyator",value:"Tekshirilmagan"},
+    {name:"Tormoz tizimi",value:"Tekshirilmagan"},
+    {name:"Shinalar",value:"Tekshirilmagan"},
+    {name:"Sovutish tizimi",value:"Tekshirilmagan"}
+  ];
+  profile={name:"User",email:"",phone:""};
+  setTheme(false);saveAll();renderAll();toast("Ma'lumotlar tozalandi.");
+});
+
+/* DASHBOARD */
+function renderDashboard(){
+  $("statCars").textContent=cars.length;
+  $("statDiagnoses").textContent=diagnoses.length;
+  $("statExpenses").textContent=money(expenses.reduce((s,e)=>s+Number(e.amount),0));
+  $("statReminders").textContent=reminders.filter(r=>!r.done).length;
+
+  $("recentDiagnoses").className=diagnoses.length?"":"empty";
+  $("recentDiagnoses").innerHTML=diagnoses.length?diagnoses.slice(0,4).map(d=>`
+    <div class="settings-row">
+      <div><strong>${safe(d.title)}</strong><p>${safe(d.date)}</p></div>
+      <button class="btn secondary small" onclick="viewReport(${d.id})">Ko‘rish</button>
+    </div>`).join(""):'<div><div>🔍</div>Hozircha diagnostika mavjud emas.</div>';
+}
+
+function renderAll(){
+  renderDashboard();
+  renderGarage();
+  renderHistory();
+  renderHealth();
+  renderReminders();
+  renderExpenses();
+  renderProfile();
+}
+
+/* INITIALIZE */
+renderAll();
+</script>
+</body>
+</html>
